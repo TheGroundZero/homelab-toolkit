@@ -6,6 +6,7 @@ Generates Quadlet container definitions, Caddy reverse proxy configs, and enviro
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -23,7 +24,7 @@ class ManifestParser:
     def _load_yaml(self) -> Dict[str, Any]:
         """Load and parse YAML manifest."""
         try:
-            with open(self.manifest_file) as f:
+            with open(os.path.basename(str(self.manifest_file))) as f:
                 data = yaml.safe_load(f)
             return data or {}
         except Exception as e:
