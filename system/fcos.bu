@@ -1,0 +1,38 @@
+variant: fcos
+version: 1.7.0
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys_local:
+        - system/id_ed25519.pub
+      home_dir: /home/core
+      groups:
+        - wheel
+        - plugdev
+        - dialout
+      shell: /bin/bash
+storage:
+  trees:
+    - local: .config/containers/systemd
+      path: /home/core/.config/containers/systemd
+    - local: homelab
+      path: /home/core/homelab
+systemd:
+  units:
+    - name: chown-core-home.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Set ownership of /home/core to core user
+        ConditionFirstBoot=yes
+        After=local-fs.target
+        Before=multi-user.target
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/chown -R core:core /home/core
+        ExecStart=/usr/bin/find /home/core -name "*.env" -type f -exec /usr/bin/chmod 600 {} +
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=multi-user.target

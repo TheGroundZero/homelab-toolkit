@@ -1,5 +1,8 @@
+.venv
+.vscode
+
 *.env
 !*.env.example
 
-.venv
-.vscode
+system/*.pub
+system/*.ign
