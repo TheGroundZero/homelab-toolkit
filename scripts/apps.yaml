@@ -2,6 +2,13 @@ defaults:
   timezone: Europe/Brussels
   update: registry
   userns: keep-id
+  # Optional per-app overrides for custom container behavior:
+  # podman_args:
+  #   - --log-level=debug
+  # container_args:
+  #   - --help
+  # quadlet_extra:
+  #   - SecurityLabel=disable
 
 apps:
   # Reverse proxy
