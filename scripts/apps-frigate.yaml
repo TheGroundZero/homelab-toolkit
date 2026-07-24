@@ -1,0 +1,20 @@
+defaults:
+  timezone: Europe/Brussels
+  update: registry
+  userns: keep-id
+
+apps:
+  - name: frigate
+    image: ghcr.io/blakeblackshear/frigate:stable
+    network: host
+    exposure: local
+    auth: no
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+      - /dev/dri:/dev/dri
+    volumes:
+      - homelab/frigate/config:/config:z
+      - homelab/frigate/media:/media:Z
+      - homelab/frigate/recordings:/recordings:Z
+    # Frigate requires access to the host for hardware acceleration and cameras.
+    # Add any additional podman_args or quadlet_extra if needed.
