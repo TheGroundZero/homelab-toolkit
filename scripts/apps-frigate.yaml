@@ -1,0 +1,23 @@
+defaults:
+  timezone: Europe/Brussels
+  update: registry
+  userns: keep-id
+
+apps:
+  - name: frigate
+    image: ghcr.io/blakeblackshear/frigate:stable
+    network: camera.network
+    exposure: local
+    auth: no
+    devices:
+      - /dev/bus/usb:/dev/bus/usb # Google Coral USB stick
+    volumes:
+      - homelab/frigate/config:/config:z
+      - homelab/frigate/media:/media:Z
+      - homelab/frigate/recordings:/recordings:Z
+    # Frigate requires access to the host for hardware acceleration and cameras.
+    # Add any additional podman_args or quadlet_extra if needed.
+    quadlet_extra:
+      - Network=iot.network
+      - PodmanArgs=--shm-size=1024m
+      - Tmpfs=/tmp/cache:size=1G
