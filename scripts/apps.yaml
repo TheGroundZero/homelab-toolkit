@@ -12,6 +12,8 @@ defaults:
 
 apps:
   # Reverse proxy
+  # This is the only container exposed in the DMZ
+  # It connects to other containers via the homelab network
   - name: caddy
     image: localhost/caddy-custom:latest
     network: homelab.network
@@ -30,7 +32,11 @@ apps:
       - homelab/caddy/data:/data:Z
       - homelab/caddy/config:/config:Z
     update: local
+    quadlet_extra:
+      - Network=dmz.network
 
+  # Local SSO/auth provider
+  # Provides authentication to apps that don't have it natively
   - name: auth
     image: ghcr.io/goauthentik/server:latest
     network: homelab.network
@@ -46,7 +52,9 @@ apps:
       - homelab/auth/data:/data:Z
       - homelab/auth/templates:/templates:Z
 
-  # IoT and home automation
+  # Home automation platform
+  # Is connected to host network because of e.g. mDNS
+  # Needs to connect to devices on IOT, NOT, CAMERA networks
   - name: homeassistant
     image: ghcr.io/home-assistant/home-assistant:stable
     network: host
@@ -60,6 +68,8 @@ apps:
       - homelab/homeassistant/config:/config:z
       - /run/dbus:/run/dbus:ro
   
+  # MQTT broker
+  # Is used by e.g. Zigbee2MQTT and Home Assistant to communicate
   - name: mqtt
     image: docker.io/eclipse-mosquitto:latest
     network: homelab.network
@@ -73,6 +83,8 @@ apps:
       - homelab/mosquitto/data:/mosquitto/data:Z
       - homelab/mosquitto/log:/mosquitto/log:Z
   
+  # Zigbee to MQTT bridge
+  # Connects to Zigbee coordinator and MQTT broker 
   - name: zigbee
     image: docker.io/koenkk/zigbee2mqtt:latest
     network: homelab.network
@@ -90,6 +102,9 @@ apps:
       - homelab/zigbee/data:/app/data:z
       - /run/udev:/run/udev:ro
 
+  # ESPHome dashboard
+  # Build ESPHome firmware, connect to flashed devices
+  # Is connected to host network so it can reach devices over mDNS
   - name: esphome
     image: docker.io/esphome/esphome:latest
     network: host
@@ -102,7 +117,8 @@ apps:
     volumes:
       - homelab/esphome/config:/config:z
 
-  # Development and monitoring
+  # VSCode server IDE
+  # Mounts config folders of other containers to manage them centrally
   - name: code
     image: ghcr.io/coder/code-server:latest
     network: homelab.network
@@ -120,6 +136,7 @@ apps:
       - homelab/mqtt/config:/config/workspace/mqtt:z
       - homelab/zigbee/data:/config/workspace/zigbee:z
 
+  # Speedtest tracker
   - name: speedtest
     image: lscr.io/linuxserver/speedtest-tracker:latest
     network: homelab.network
@@ -134,7 +151,7 @@ apps:
       - homelab/speedtest/config:/config:Z
       - homelab/speedtest/data:/data:Z
 
-  # Backend services (non-exposed infrastructure)
+  # Database used by Authentik
   - name: postgres
     image: docker.io/library/postgres:16-alpine
     network: homelab.network
