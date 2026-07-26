@@ -13,6 +13,45 @@ passwd:
       shell: /bin/bash
 storage:
   files:
+    - path: /etc/NetworkManager/system-connections/ethernet.nmconnection
+      mode: 0600
+      contents:
+        inline: |
+          [connection]
+          id=ethernet
+          uuid=b4a17a54-99aa-4e87-beba-28c1a3a7f4d2
+          type=ethernet
+
+          [ethernet]
+
+          [ipv4]
+          method=auto
+
+          [ipv6]
+          method=disabled
+          addr-gen-mode=stable-privacy
+
+    - path: /etc/NetworkManager/system-connections/vlan40.nmconnection
+      mode: 0600
+      contents:
+        inline: |
+          [connection]
+          id=vlan40
+          uuid=c5b28b65-aabb-5f98-cfcb-39d2b4b8e5e3
+          type=vlan
+          interface-name=vlan40
+
+          [vlan]
+          id=40
+          parent=b4a17a54-99aa-4e87-beba-28c1a3a7f4d2
+
+          [ipv4]
+          method=auto
+
+          [ipv6]
+          method=disabled
+          addr-gen-mode=stable-privacy
+
     - path: /var/lib/systemd/linger/core
       mode: 0644
   trees:
@@ -26,7 +65,7 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=Set ownership of /home/core to core user
+        Description=Set ownership of /home/core to core user and limit permissions on .env files
         ConditionFirstBoot=yes
         After=local-fs.target
         Before=multi-user.target
